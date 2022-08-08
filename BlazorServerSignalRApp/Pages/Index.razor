@@ -1,0 +1,94 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Loopring
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+
+<PageTitle>Address Lookup</PageTitle>
+
+<div class="form-group">
+    <label>
+        Wallet Address: 
+        <input @bind="ens" size="44" />
+    </label>
+    <button @onclick="GetENS" disabled="@(!IsConnected)">Find ENS</button>
+</div>
+
+<hr>
+
+<p>@address</p>
+
+
+
+@code {
+    private HubConnection? hubConnection;
+    private HubConnection? hubConnection2;
+    private List<string> messages = new List<string>();
+    private string? address;
+    private string? userInput;
+    private string? messageInput;
+    private string? ens;
+    private string? xapi;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+
+        hubConnection2 = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/loopringService"))
+            .Build();
+
+        hubConnection2.On<string>("ReceiveMessage2", (data) =>
+        {
+            if (data == "")
+            {
+                 address = "This wallet has no ENS.";
+            }
+            else
+            {
+                address = data;
+            }
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection2.StartAsync();
+    }
+
+    private async Task Send()
+    {
+        if (hubConnection is not null)
+            {
+                await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+            }
+    }
+
+    private async Task GetENS()
+    {
+        if (hubConnection2 is not null)
+            {
+                await hubConnection2.SendAsync("GetENS", ens);
+            }
+    }
+
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

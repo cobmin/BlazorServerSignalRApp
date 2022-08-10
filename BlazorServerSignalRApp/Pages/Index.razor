@@ -9,7 +9,7 @@
 <div class="form-group">
     <label>
         Hex/Ens: 
-        <input @bind="userInput" @onkeydown="@Enter" required size="44" />
+        <input @bind="userInput" @onkeyup="@Enter" required size="44" />
     </label>
     <button @onclick="GetEnsorHex" disabled="@(!IsConnected)">Find</button>
 </div>
@@ -39,7 +39,7 @@
         {
             if (data == "")
             {
-                 userResult = "This ens does not exist.";
+                userResult = "This ens does not exist.";
             }
             else
             {
@@ -52,15 +52,15 @@
     }
 
     private async Task Enter(KeyboardEventArgs e)
-{
-    if (e.Code == "Enter" || e.Code == "NumpadEnter")
     {
-        if (hubConnection is not null)
-            {
-                await hubConnection.SendAsync("GetEnsorHex", userInput);
-            }
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            if (hubConnection is not null)
+                {
+                    await hubConnection.SendAsync("GetEnsorHex", userInput);
+                }
+        }
     }
-}
     private async Task GetEnsorHex()
     {
         if (hubConnection is not null)

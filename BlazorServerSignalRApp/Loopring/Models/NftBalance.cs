@@ -1,30 +1,61 @@
-﻿namespace BlazorServerSignalRApp.Loopring.Models
+﻿using System.Text.Json.Serialization;
+
+namespace BlazorServerSignalRApp.Loopring.Models
 {
-    public class Datum
+    public class NftBalanceData
     {
-        public int id { get; set; }
-        public int accountId { get; set; }
-        public int tokenId { get; set; }
-        public string nftData { get; set; }
-        public string tokenAddress { get; set; }
-        public string nftId { get; set; }
-        public string nftType { get; set; }
-        public string total { get; set; }
-        public string locked { get; set; }
-        public Pending pending { get; set; }
-        public string deploymentStatus { get; set; }
-        public bool isCounterFactualNFT { get; set; }
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("accountId")]
+        public int AccountId { get; set; }
+
+        [JsonPropertyName("tokenId")]
+        public int TokenId { get; set; }
+
+        [JsonPropertyName("nftData")]
+        public string? NftData { get; set; }
+
+        [JsonPropertyName("tokenAddress")]
+        public string? TokenAddress { get; set; }
+
+        [JsonPropertyName("nftId")]
+        public string? NftId { get; set; }
+
+        [JsonPropertyName("nftType")]
+        public string? NftType { get; set; }
+
+        [JsonPropertyName("total")]
+        public string? Total { get; set; }
+
+        [JsonPropertyName("locked")]
+        public string? Locked { get; set; }
+
+        [JsonPropertyName("pending")]
+        public Pending? Pending { get; set; }
+
+        [JsonPropertyName("deploymentStatus")]
+        public string? DeploymentStatus { get; set; }
+
+        [JsonPropertyName("isCounterFactualNFT")]
+        public bool IsCounterFactualNFT { get; set; }
     }
 
     public class Pending
     {
-        public string withdraw { get; set; }
-        public string deposit { get; set; }
+        [JsonPropertyName("withdraw")]
+        public string? Withdraw { get; set; }
+
+        [JsonPropertyName("deposit")]
+        public string? Deposit { get; set; }
     }
 
     public class NftBalance
     {
-        public int totalNum { get; set; }
-        public List<Datum> data { get; set; }
+        [JsonPropertyName("totalNum")]
+        public int TotalNum { get; set; }
+
+        [JsonPropertyName("data")]
+        public List<NftBalanceData>? Data { get; set; }
     }
 }

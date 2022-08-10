@@ -29,10 +29,6 @@ namespace BlazorServerSignalRApp.Loopring
                  string nftData
                  );
 
-        Task<EnsResult> GetHexAddress(string apiKey, string ens);
-
-        //Task<EnsResult> GetENS(string apiKey, string hexAddress);
-
-        Task GetENS(string hexAddress);
+        Task GetEnsorHex(string userInput);
     }
 }

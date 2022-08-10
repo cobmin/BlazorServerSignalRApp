@@ -1,8 +1,13 @@
-﻿namespace BlazorServerSignalRApp.Loopring.Models
+﻿using System.Text.Json.Serialization;
+
+namespace BlazorServerSignalRApp.Loopring.Models
 {
     public class StorageId
     {
-        public int orderId { get; set; }
-        public int offchainId { get; set; }
+        [JsonPropertyName("orderId")]
+        public int OrderId { get; set; }
+
+        [JsonPropertyName("offchainId")]
+        public int OffchainId { get; set; }
     }
 }

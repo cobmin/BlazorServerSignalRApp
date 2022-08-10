@@ -1,14 +1,22 @@
-﻿namespace BlazorServerSignalRApp.Loopring.Models
+﻿using System.Text.Json.Serialization;
+
+namespace BlazorServerSignalRApp.Loopring.Models
 {
     public class ResultInfo
     {
-        public int code { get; set; }   
-        public string message { get; set; }
+        [JsonPropertyName("code")]
+        public int Code { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
     }
 
     public class EnsResult
     {
-        public ResultInfo resultInfo { get; set; }
-        public string data { get; set; }
+        [JsonPropertyName("resultInfo")]
+        public ResultInfo? ResultInfo { get; set; }
+
+        [JsonPropertyName("data")]
+        public string? Data { get; set; }
     }
 }

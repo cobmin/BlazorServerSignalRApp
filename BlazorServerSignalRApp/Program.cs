@@ -32,7 +32,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
-app.MapHub<ChatHub>("/chathub");
 app.MapHub<LoopringService>("/loopringService");
 app.MapFallbackToPage("/_Host");
 

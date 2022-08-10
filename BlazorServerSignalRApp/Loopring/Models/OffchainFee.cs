@@ -1,15 +1,25 @@
-﻿namespace BlazorServerSignalRApp.Loopring.Models
+﻿using System.Text.Json.Serialization;
+
+namespace BlazorServerSignalRApp.Loopring.Models
 {
     public class Fee
     {
-        public string token { get; set; }
-        public string fee { get; set; }
-        public int discount { get; set; }
+        [JsonPropertyName("token")]
+        public string? Token { get; set; }
+
+        [JsonPropertyName("fee")]
+        public string? FFee { get; set; }
+
+        [JsonPropertyName("discount")]
+        public int Discount { get; set; }
     }
 
     public class OffchainFee
     {
-        public string gasPrice { get; set; }
-        public List<Fee> fees { get; set; }
+        [JsonPropertyName("gasPrice")]
+        public string? GasPrice { get; set; }
+
+        [JsonPropertyName("fees")]
+        public List<Fee>? Fees { get; set; }
     }
 }

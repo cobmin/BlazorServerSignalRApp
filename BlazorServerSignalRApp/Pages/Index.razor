@@ -8,76 +8,64 @@
 
 <div class="form-group">
     <label>
-        Wallet Address: 
-        <input @bind="ens" size="44" />
+        Hex/Ens: 
+        <input @bind="userInput" @onkeydown="@Enter" required size="44" />
     </label>
-    <button @onclick="GetENS" disabled="@(!IsConnected)">Find ENS</button>
+    <button @onclick="GetEnsorHex" disabled="@(!IsConnected)">Find</button>
 </div>
 
 <hr>
 
-<p>@address</p>
+<p>@userResult</p>
 
 
 
 @code {
     private HubConnection? hubConnection;
-    private HubConnection? hubConnection2;
-    private List<string> messages = new List<string>();
-    private string? address;
+    private string? addressInput;
+    private string? ensResult;
+    private string? addressResult;
+    private string? ensInput;
     private string? userInput;
-    private string? messageInput;
-    private string? ens;
-    private string? xapi;
+    private string? userResult;
 
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .WithUrl(NavigationManager.ToAbsoluteUri("/loopringService"))
             .Build();
 
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        hubConnection.On<string>("ReceiveMessage", (data) =>
         {
-            var encodedMsg = $"{user}: {message}";
-            messages.Add(encodedMsg);
+            if (data == "")
+            {
+                 userResult = "This ens does not exist.";
+            }
+            else
+            {
+                userResult = data;
+            }
             InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();
-
-        hubConnection2 = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/loopringService"))
-            .Build();
-
-        hubConnection2.On<string>("ReceiveMessage2", (data) =>
-        {
-            if (data == "")
-            {
-                 address = "This wallet has no ENS.";
-            }
-            else
-            {
-                address = data;
-            }
-            InvokeAsync(StateHasChanged);
-        });
-
-        await hubConnection2.StartAsync();
     }
 
-    private async Task Send()
+    private async Task Enter(KeyboardEventArgs e)
+{
+    if (e.Code == "Enter" || e.Code == "NumpadEnter")
     {
         if (hubConnection is not null)
             {
-                await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+                await hubConnection.SendAsync("GetEnsorHex", userInput);
             }
     }
-
-    private async Task GetENS()
+}
+    private async Task GetEnsorHex()
     {
-        if (hubConnection2 is not null)
+        if (hubConnection is not null)
             {
-                await hubConnection2.SendAsync("GetENS", ens);
+                await hubConnection.SendAsync("GetEnsorHex", userInput);
             }
     }
 

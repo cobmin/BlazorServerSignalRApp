@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using RestSharp;
+
 namespace BlazorServerSignalRApp.Loopring
 {
     public class LoopringService : Hub, ILoopringService, IDisposable
@@ -107,30 +108,6 @@ namespace BlazorServerSignalRApp.Loopring
             }
         }
 
-        public async Task<EnsResult> GetHexAddress(string apiKey, string ens)
-        {
-            var request = new RestRequest("api/wallet/v3/resolveEns");
-            request.AddHeader("x-api-key", apiKey);
-            request.AddParameter("fullName", ens);
-            try
-            {
-                var response = await _client.GetAsync(request);
-                var data = JsonConvert.DeserializeObject<EnsResult>(response.Content!);
-                return data;
-            }
-            catch (HttpRequestException httpException)
-            {
-                Console.WriteLine($"Error getting ens: {httpException.Message}");
-                return null;
-            }
-        }
-
-        public new void Dispose()
-        {
-            _client?.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
         public async Task<NftBalance> GetNftBalance(string apiKey, int accountId, string nftData)
         {
             var request = new RestRequest("api/v3/user/nft/balances");
@@ -150,44 +127,59 @@ namespace BlazorServerSignalRApp.Loopring
             }
         }
 
-        //public async Task<EnsResult> GetENS(string apiKey, string hexAddress)
-        //{
-        //    var request = new RestRequest("api/wallet/v3/resolveName");
-        //    request.AddHeader("x-api-key", apiKey);
-        //    request.AddParameter("owner", hexAddress);
-        //    try
-        //    {
-        //        var response = await _client.GetAsync(request);
-        //        var data = JsonConvert.DeserializeObject<EnsResult>(response.Content!);
-        //        return data;
-        //    }
-        //    catch (HttpRequestException httpException)
-        //    {
-        //        Console.WriteLine($"Error getting ens: {httpException.Message}");
-        //        return null;
-        //    }
-        //}
-
-        public async Task GetENS(string hexAddress)
+        public async Task GetEnsorHex(string userInput)
         {
-            var request = new RestRequest("api/wallet/v3/resolveName");
-            request.AddHeader("x-api-key", "jjkHSyWPgvpVL00nVt1T4QEQaSsevqP6UOnv5qGgQbf6rCTvBvetQ4JFJtTIN1Ft");
-            request.AddParameter("owner", hexAddress);
-            try
+            if (userInput == null || (!userInput.ToLower().Trim().EndsWith(".eth") && !userInput.ToLower().Trim().StartsWith("0x")))
             {
-                var response = await _client.GetAsync(request);
-                var data = JsonConvert.DeserializeObject<EnsResult>(response.Content!);
-                if (data.data == null)
+                userInput = "Enter hex address or Ens.";
+                await Clients.All.SendAsync("ReceiveMessage", userInput);
+            }
+            else if (!userInput.ToLower().Trim().EndsWith(".eth"))
+            {
+                var request = new RestRequest("api/wallet/v3/resolveName");
+                request.AddParameter("owner", userInput.ToLower());
+                try
                 {
-                    data.data = "This is not a proper wallet address";
+                    var response = await _client.GetAsync(request);
+                    var data = JsonConvert.DeserializeObject<EnsResult>(response.Content!);
+                    if (data.Data == "")
+                    {
+                        data.Data = "This is not a valid wallet address";
+                    }
+                    await Clients.All.SendAsync("ReceiveMessage", data.Data);
                 }
-                await Clients.All.SendAsync("ReceiveMessage2", data.data);
+                catch (HttpRequestException httpException)
+                {
+                    Console.WriteLine($"Error getting ens: {httpException.Message}");
+                    await Clients.All.SendAsync("ReceiveMessage", userInput);
+                }
             }
-            catch (HttpRequestException httpException)
+            else
             {
-                Console.WriteLine($"Error getting ens: {httpException.Message}");
-                await Clients.All.SendAsync("ReceiveMessage2", hexAddress);
+                var request = new RestRequest("api/wallet/v3/resolveEns");
+                request.AddParameter("fullName", userInput.ToLower());
+                try
+                {
+                    var response = await _client.GetAsync(request);
+                    var data = JsonConvert.DeserializeObject<EnsResult>(response.Content!);
+                    if (data.Data == null)
+                    {
+                        data.Data = "This Hex doesn't have an Ens.";
+                    }
+                    await Clients.All.SendAsync("ReceiveMessage", data.Data);
+                }
+                catch (HttpRequestException httpException)
+                {
+                    Console.WriteLine($"Error getting ens: {httpException.Message}");
+                    await Clients.All.SendAsync("ReceiveMessage", userInput);
+                }
             }
+            
+        }
+        public new void Dispose()
+        {
+            _client?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }
